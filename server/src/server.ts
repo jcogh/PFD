@@ -1,8 +1,12 @@
 import express from 'express';
 import connectDB from './utils/database';
 import transactionRoutes from './routes/transactions';
+import userRoutes from './routes/users';
 import { errorHandler } from './middleware/errorHandler';
 import logger from './utils/logger';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -12,6 +16,7 @@ const startServer = async () => {
 		await connectDB();
 
 		app.use('/api/transactions', transactionRoutes);
+		app.use('/api/users', userRoutes);
 
 		app.use(errorHandler);
 
