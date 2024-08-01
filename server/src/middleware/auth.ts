@@ -14,15 +14,18 @@ declare global {
 	}
 }
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-	const authHeader = req.headers['authorization'];
-	const token = authHeader && authHeader.split(' ')[1];
+export const auth = (req: Request, res: Response, next: NextFunction) => {
+	const token = req.header('Authorization')?.replace('Bearer ', '');
 
-	if (token == null) return res.sendStatus(401);
+	if (!token) {
+		return res.status(401).send({ error: 'Please authenticate.' });
+	}
 
-	jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
-		if (err) return res.sendStatus(403);
-		req.user = user as UserPayload;
+	try {
+		const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as UserPayload;
+		req.user = decoded;
 		next();
-	});
+	} catch (e) {
+		res.status(401).send({ error: 'Please authenticate.' });
+	}
 };

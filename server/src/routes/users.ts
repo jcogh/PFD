@@ -1,7 +1,8 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User, { IUser } from '../models/User';
+import User from '../models/User';
+import { auth } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -20,9 +21,17 @@ router.post('/register', async (req, res) => {
 		const newUser = new User({ name, email, password });
 		await newUser.save();
 
-		res.status(201).json({ message: 'User registered successfully' });
+		// Generate JWT token
+		const token = jwt.sign(
+			{ userId: newUser._id },
+			process.env.JWT_SECRET as string,
+			{ expiresIn: '1h' }
+		);
+
+		res.status(201).json({ message: 'User registered successfully', token });
 	} catch (error) {
-		res.status(500).json({ message: 'Error registering user', error });
+		console.error('Registration error:', error);
+		res.status(500).json({ message: 'Error registering user', error: error instanceof Error ? error.message : 'An unknown error occurred' });
 	}
 });
 
@@ -30,30 +39,24 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
 	try {
 		const { email, password } = req.body;
-
-		// Check if user exists
 		const user = await User.findOne({ email });
 		if (!user) {
-			return res.status(400).json({ message: 'Invalid credentials' });
+			throw new Error('Unable to login');
 		}
-
-		// Check password
-		const isMatch = await user.comparePassword(password);
+		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) {
-			return res.status(400).json({ message: 'Invalid credentials' });
+			throw new Error('Unable to login');
 		}
-
-		// Create and sign JWT
-		const token = jwt.sign(
-			{ id: user._id, email: user.email },
-			process.env.JWT_SECRET as string,
-			{ expiresIn: '1h' }
-		);
-
-		res.json({ token, userId: user._id });
+		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
+		res.send({ user, token });
 	} catch (error) {
-		res.status(500).json({ message: 'Error logging in', error });
+		res.status(400).send(error);
 	}
+});
+
+// Get user profile
+router.get('/me', auth, async (req, res) => {
+	res.send(req.user);
 });
 
 export default router;

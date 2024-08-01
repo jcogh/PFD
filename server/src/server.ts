@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import connectDB from './utils/database';
 import transactionRoutes from './routes/transactions';
 import userRoutes from './routes/users';
@@ -9,6 +10,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
+
+// CORS middleware
+app.use(cors({
+	origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+	credentials: true,
+}));
+
 app.use(express.json());
 
 const startServer = async () => {

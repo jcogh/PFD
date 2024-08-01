@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchTransactions } from '../store/transactionSlice';
 import { RootState, AppDispatch } from '../store';
+import { fetchTransactions, Transaction } from '../store/transactionsSlice';
 
 const TransactionList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,11 +17,15 @@ const TransactionList: React.FC = () => {
     return <div>Loading...</div>;
   }
 
+  if (status === 'failed') {
+    return <div>Error loading transactions</div>;
+  }
+
   return (
-    <div className="transaction-list">
+    <div>
       <h2>Recent Transactions</h2>
       <ul>
-        {transactions.map((transaction) => (
+        {transactions.map((transaction: Transaction) => (
           <li key={transaction._id}>
             {transaction.description} - ${transaction.amount}
           </li>

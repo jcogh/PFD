@@ -1,6 +1,6 @@
 import express from 'express';
 import Transaction, { ITransaction } from '../models/Transaction';
-import { authenticateToken } from '../middleware/auth';
+import { auth as authenticateToken } from '../middleware/auth';
 import { categorizeExpense } from '../utils/categorization';
 
 const router = express.Router();

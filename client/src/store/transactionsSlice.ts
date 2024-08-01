@@ -1,33 +1,35 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-interface Transaction {
+export interface Transaction {
   _id: string;
-  amount: number;
-  type: 'income' | 'expense';
-  category: string;
   description: string;
-  date: string;
+  amount: number;
+  category: string;
+  // Add other fields as necessary
 }
 
-interface TransactionState {
+interface TransactionsState {
   transactions: Transaction[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
-const initialState: TransactionState = {
+const initialState: TransactionsState = {
   transactions: [],
   status: 'idle',
   error: null,
 };
 
-export const fetchTransactions = createAsyncThunk('transactions/fetchTransactions', async () => {
-  const response = await axios.get<Transaction[]>('/api/transactions');
-  return response.data;
-});
+export const fetchTransactions = createAsyncThunk(
+  'transactions/fetchTransactions',
+  async () => {
+    const response = await axios.get('/api/transactions');
+    return response.data;
+  }
+);
 
-const transactionSlice = createSlice({
+const transactionsSlice = createSlice({
   name: 'transactions',
   initialState,
   reducers: {},
@@ -36,7 +38,7 @@ const transactionSlice = createSlice({
       .addCase(fetchTransactions.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchTransactions.fulfilled, (state, action) => {
+      .addCase(fetchTransactions.fulfilled, (state, action: PayloadAction<Transaction[]>) => {
         state.status = 'succeeded';
         state.transactions = action.payload;
       })
@@ -47,4 +49,4 @@ const transactionSlice = createSlice({
   },
 });
 
-export default transactionSlice.reducer;
+export default transactionsSlice.reducer;
