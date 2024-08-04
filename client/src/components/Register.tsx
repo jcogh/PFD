@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../services/api';
 import axios from 'axios';
 
@@ -86,6 +86,15 @@ const Register: React.FC = () => {
             </button>
           </div>
         </form>
+        <div className="text-center">
+          <p className="text-magenta">Already have an account?</p>
+          <Link
+            to="/login"
+            className="mt-2 inline-block px-4 py-2 border border-transparent text-sm font-medium rounded-md text-background bg-green hover:bg-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan transition-colors duration-200"
+          >
+            Log In
+          </Link>
+        </div>
       </div>
     </div>
   );

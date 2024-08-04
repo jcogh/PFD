@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { login } from '../store/authSlice';
 
@@ -66,6 +66,15 @@ const Login: React.FC = () => {
             >
               Sign in
             </button>
+          </div>
+          <div className="text-center">
+            <p className="text-magenta">Don't have an account?</p>
+            <Link
+              to="/register"
+              className="mt-2 inline-block px-4 py-2 border border-transparent text-sm font-medium rounded-md text-background bg-green hover:bg-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan transition-colors duration-200"
+            >
+              Register
+            </Link>
           </div>
         </form>
       </div>
