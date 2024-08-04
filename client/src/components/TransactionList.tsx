@@ -5,7 +5,7 @@ import { fetchTransactions, Transaction } from '../store/transactionsSlice';
 
 const TransactionList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { transactions, status } = useSelector((state: RootState) => state.transactions);
+  const { transactions, status, error } = useSelector((state: RootState) => state.transactions);
 
   useEffect(() => {
     if (status === 'idle') {
@@ -14,11 +14,15 @@ const TransactionList: React.FC = () => {
   }, [status, dispatch]);
 
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return <div>Loading transactions...</div>;
   }
 
   if (status === 'failed') {
-    return <div>Error loading transactions</div>;
+    return <div>Error loading transactions: {error}</div>;
+  }
+
+  if (transactions.length === 0) {
+    return <div>No transactions found.</div>;
   }
 
   return (
@@ -27,7 +31,7 @@ const TransactionList: React.FC = () => {
       <ul>
         {transactions.map((transaction: Transaction) => (
           <li key={transaction._id}>
-            {transaction.description} - ${transaction.amount}
+            {transaction.category} - ${transaction.amount} ({transaction.type})
           </li>
         ))}
       </ul>

@@ -11,13 +11,17 @@ dotenv.config();
 
 const app = express();
 
-// CORS middleware
 app.use(cors({
 	origin: process.env.FRONTEND_URL || 'http://localhost:3000',
 	credentials: true,
 }));
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+	logger.info(`${req.method} ${req.path}`);
+	next();
+});
 
 const startServer = async () => {
 	try {

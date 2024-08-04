@@ -2,15 +2,19 @@ import express from 'express';
 import Transaction, { ITransaction } from '../models/Transaction';
 import { auth as authenticateToken } from '../middleware/auth';
 import { categorizeExpense } from '../utils/categorization';
+import logger from '../utils/logger';
 
 const router = express.Router();
 
 // GET all transactions
 router.get('/', authenticateToken, async (req, res) => {
+  logger.info('GET /api/transactions request received');
   try {
     const transactions = await Transaction.find({ user: req.user!.id });
+    logger.info(`Found ${transactions.length} transactions`);
     res.json(transactions);
   } catch (error) {
+    logger.error('Error fetching transactions:', error);
     res.status(500).json({ message: 'Error fetching transactions', error });
   }
 });

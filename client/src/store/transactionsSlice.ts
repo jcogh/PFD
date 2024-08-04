@@ -1,12 +1,14 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { fetchTransactions as fetchTransactionsAPI } from '../services/api';
 
 export interface Transaction {
   _id: string;
-  description: string;
+  user: string;
   amount: number;
+  type: 'income' | 'expense';
   category: string;
-  // Add other fields as necessary
+  date: string;
+  description: string;
 }
 
 interface TransactionsState {
@@ -23,9 +25,13 @@ const initialState: TransactionsState = {
 
 export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
-  async () => {
-    const response = await axios.get('/api/transactions');
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetchTransactionsAPI();
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'An error occurred');
+    }
   }
 );
 
@@ -44,7 +50,7 @@ const transactionsSlice = createSlice({
       })
       .addCase(fetchTransactions.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || null;
+        state.error = action.payload as string || 'An error occurred';
       });
   },
 });

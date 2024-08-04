@@ -5,7 +5,19 @@ import { Transaction } from '../store/transactionsSlice';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Charts: React.FC = () => {
-  const { transactions } = useSelector((state: RootState) => state.transactions);
+  const { transactions, status } = useSelector((state: RootState) => state.transactions);
+
+  if (status === 'loading') {
+    return <div>Loading chart data...</div>;
+  }
+
+  if (status === 'failed') {
+    return <div>Error loading chart data</div>;
+  }
+
+  if (transactions.length === 0) {
+    return <div>No transaction data available for chart</div>;
+  }
 
   const chartData = transactions.reduce((acc: Record<string, number>, transaction: Transaction) => {
     const category = transaction.category;
