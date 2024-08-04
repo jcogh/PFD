@@ -1,47 +1,91 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { Transaction } from '../store/transactionsSlice';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar, Line } from 'react-chartjs-2';
 
-const Charts: React.FC = () => {
-  const { transactions, status } = useSelector((state: RootState) => state.transactions);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-  if (status === 'loading') {
-    return <div>Loading chart data...</div>;
-  }
+interface ChartProps {
+  data: number[];
+  labels?: string[];
+}
 
-  if (status === 'failed') {
-    return <div>Error loading chart data</div>;
-  }
+interface BarChartProps extends ChartProps {
+  colors: string[];
+}
 
-  if (transactions.length === 0) {
-    return <div>No transaction data available for chart</div>;
-  }
+interface LineChartProps extends ChartProps {
+  color: string;
+}
 
-  const chartData = transactions.reduce((acc: Record<string, number>, transaction: Transaction) => {
-    const category = transaction.category;
-    acc[category] = (acc[category] || 0) + transaction.amount;
-    return acc;
-  }, {});
+export const BarChart: React.FC<BarChartProps> = ({ data, labels, colors }) => {
+  const chartData = {
+    labels: labels || data.map((_, index) => `Item ${index + 1}`),
+    datasets: [{
+      data,
+      backgroundColor: colors,
+      borderColor: colors,
+      borderWidth: 1,
+    }],
+  };
 
-  const data = Object.entries(chartData).map(([category, amount]) => ({ category, amount }));
+  const options = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { color: '#c0caf5' },
+        grid: { color: '#3a3c4c' },
+      },
+      x: {
+        ticks: { color: '#c0caf5' },
+        grid: { color: '#3a3c4c' },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+    },
+  };
 
-  return (
-    <div>
-      <h2>Expense by Category</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="amount" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
+  return <Bar data={chartData} options={options} />;
 };
 
-export default Charts;
+export const LineChart: React.FC<LineChartProps> = ({ data, labels, color }) => {
+  const chartData = {
+    labels: labels || data.map((_, index) => `Point ${index + 1}`),
+    datasets: [{
+      data,
+      borderColor: color,
+      backgroundColor: 'rgba(122, 162, 247, 0.1)',
+      tension: 0.1,
+    }],
+  };
+
+  const options = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { color: '#c0caf5' },
+        grid: { color: '#3a3c4c' },
+      },
+      x: {
+        ticks: { color: '#c0caf5' },
+        grid: { color: '#3a3c4c' },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+    },
+  };
+
+  return <Line data={chartData} options={options} />;
+};
