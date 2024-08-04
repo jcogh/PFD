@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-	baseURL: 'https://pfdapp-whrsa.ondigitalocean.app/api',
+	baseURL: 'https://pfdapp-whrsa.ondigitalocean.app',
 });
 
 api.interceptors.request.use(
