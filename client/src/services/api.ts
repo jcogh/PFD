@@ -33,10 +33,10 @@ export const fetchTransactions = () => {
 };
 
 export const login = (email: string, password: string) =>
-  api.post(`/api/users/login`, { email, password });
+  api.post('/users/login', { email, password });
 
 export const register = (name: string, email: string, password: string) =>
-  api.post(`/api/users/register`, { name, email, password });
+  api.post('/users/register', { name, email, password });
 
 export const createTransaction = (transactionData: any) =>
   api.post('/transactions', transactionData);
