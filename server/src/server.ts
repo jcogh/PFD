@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import connectDB from './utils/database';
 import transactionRoutes from './routes/transactions';
 import userRoutes from './routes/users';
@@ -24,12 +25,18 @@ app.use((req, res, next) => {
 	next();
 });
 
+app.use(express.static(path.join(__dirname, '../client/build')));
+
 const startServer = async () => {
 	try {
 		await connectDB();
 
 		app.use('/api/transactions', transactionRoutes);
 		app.use('/api/users', userRoutes);
+
+		app.get('*', (req, res) => {
+			res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+		});
 
 		app.use(errorHandler);
 
