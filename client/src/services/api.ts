@@ -19,7 +19,7 @@ api.interceptors.request.use(
   }
 );
 
-export const fetchTransactions = () => {
+export const fetchTransactions = async () => {
   console.log('Fetching transactions from:', `${API_URL}/transactions`);
   return api.get('/transactions')
     .then(response => {
