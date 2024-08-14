@@ -4,6 +4,7 @@ import path from 'path';
 import connectDB from './utils/database';
 import transactionRoutes from './routes/transactions';
 import userRoutes from './routes/users';
+import importRoutes from './routes/import';
 import { errorHandler } from './middleware/errorHandler';
 import logger from './utils/logger';
 import dotenv from 'dotenv';
@@ -13,7 +14,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-	origin: process.env.FRONTEND_URL,
+	origin: process.env.FRONTEND_URL || 'http://localhost:3000',
 	credentials: true,
 	optionsSuccessStatus: 200,
 }));
@@ -33,6 +34,7 @@ const startServer = async () => {
 
 		app.use('/api/transactions', transactionRoutes);
 		app.use('/api/users', userRoutes);
+		app.use('/api/import', importRoutes);
 
 		app.get('*', (req, res) => {
 			res.sendFile(path.join(__dirname, '../client/build', 'index.html'));

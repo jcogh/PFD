@@ -1,6 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { encrypt, decrypt } from '../utils/encryption';
-import { categorizeExpense } from '../utils/categorization';
+import mongoose, { Document } from 'mongoose';
 
 export interface ITransaction extends Document {
   user: mongoose.Types.ObjectId;
@@ -11,20 +9,13 @@ export interface ITransaction extends Document {
   description: string;
 }
 
-const TransactionSchema: Schema = new Schema({
-  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+const transactionSchema = new mongoose.Schema<ITransaction>({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   amount: { type: Number, required: true },
   type: { type: String, enum: ['income', 'expense'], required: true },
   category: { type: String, required: true },
   date: { type: Date, default: Date.now },
-  description: { type: String, required: true, set: encrypt, get: decrypt }
+  description: { type: String, required: true }
 });
 
-TransactionSchema.pre<ITransaction>('save', function(next) {
-  if (this.isModified('description')) {
-    this.category = categorizeExpense(this.description);
-  }
-  next();
-});
-
-export default mongoose.model<ITransaction>('Transaction', TransactionSchema);
+export default mongoose.model<ITransaction>('Transaction', transactionSchema);

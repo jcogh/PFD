@@ -11,14 +11,16 @@ const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await axios.post(`${API_URL}/users/login`, { email, password });
-      localStorage.setItem('token', response.data.token);
-      dispatch(login({ id: response.data.user.id, email: response.data.user.email }));
+      dispatch(login({
+        user: { id: response.data.user._id, email: response.data.user.email },
+        token: response.data.token
+      }));
       navigate('/dashboard');
     } catch (err) {
       setError('Invalid email or password');

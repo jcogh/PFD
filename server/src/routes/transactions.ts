@@ -1,16 +1,16 @@
 import express from 'express';
-import Transaction, { ITransaction } from '../models/Transaction';
-import { auth as authenticateToken } from '../middleware/auth';
+import Transaction from '../models/Transaction';
+import { auth } from '../middleware/auth';
 import { categorizeExpense } from '../utils/categorization';
 import logger from '../utils/logger';
 
 const router = express.Router();
 
 // GET all transactions
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   logger.info('GET /api/transactions request received');
   try {
-    const transactions = await Transaction.find({ user: req.user!.id });
+    const transactions = await Transaction.find({ user: req.user!.userId });
     logger.info(`Found ${transactions.length} transactions`);
     res.json(transactions);
   } catch (error) {
@@ -20,9 +20,9 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // GET a specific transaction
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
-    const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user!.id });
+    const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user!.userId });
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' });
     }
@@ -33,11 +33,16 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 // POST a new transaction
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
-    const newTransaction: ITransaction = new Transaction({
-      ...req.body,
-      user: req.user!.id
+    const { amount, type, description } = req.body;
+    const category = categorizeExpense(description);
+    const newTransaction = new Transaction({
+      amount,
+      type,
+      description,
+      category,
+      user: req.user!.userId
     });
     const savedTransaction = await newTransaction.save();
     res.status(201).json(savedTransaction);
@@ -47,11 +52,13 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // PUT (update) a transaction
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
+    const { amount, type, description } = req.body;
+    const category = categorizeExpense(description);
     const updatedTransaction = await Transaction.findOneAndUpdate(
-      { _id: req.params.id, user: req.user!.id },
-      req.body,
+      { _id: req.params.id, user: req.user!.userId },
+      { amount, type, description, category },
       { new: true }
     );
     if (!updatedTransaction) {
@@ -64,53 +71,15 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 // DELETE a transaction
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
-    const deletedTransaction = await Transaction.findOneAndDelete({ _id: req.params.id, user: req.user!.id });
+    const deletedTransaction = await Transaction.findOneAndDelete({ _id: req.params.id, user: req.user!.userId });
     if (!deletedTransaction) {
       return res.status(404).json({ message: 'Transaction not found' });
     }
     res.json({ message: 'Transaction deleted successfully' });
   } catch (error) {
     res.status(400).json({ message: 'Error deleting transaction', error });
-  }
-});
-
-// POST a new transaction
-router.post('/', authenticateToken, async (req, res) => {
-  try {
-    const { amount, type, description } = req.body;
-    const category = categorizeExpense(description);
-    const newTransaction: ITransaction = new Transaction({
-      amount,
-      type,
-      description,
-      category,
-      user: req.user!.id
-    });
-    const savedTransaction = await newTransaction.save();
-    res.status(201).json(savedTransaction);
-  } catch (error) {
-    res.status(400).json({ message: 'Error creating transaction', error });
-  }
-});
-
-// PUT (update) a transaction
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { amount, type, description } = req.body;
-    const category = categorizeExpense(description);
-    const updatedTransaction = await Transaction.findOneAndUpdate(
-      { _id: req.params.id, user: req.user!.id },
-      { amount, type, description, category },
-      { new: true }
-    );
-    if (!updatedTransaction) {
-      return res.status(404).json({ message: 'Transaction not found' });
-    }
-    res.json(updatedTransaction);
-  } catch (error) {
-    res.status(400).json({ message: 'Error updating transaction', error });
   }
 });
 

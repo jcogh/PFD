@@ -1,22 +1,26 @@
 import React from 'react';
 
 interface Transaction {
-  id: number;
+  _id: string;
   date: string;
   description: string;
   amount: number;
   type: 'income' | 'expense';
 }
 
-const transactions: Transaction[] = [
-  { id: 1, date: '2023-07-01', description: 'Salary', amount: 5000, type: 'income' },
-  { id: 2, date: '2023-07-02', description: 'Rent', amount: 1500, type: 'expense' },
-  { id: 3, date: '2023-07-03', description: 'Groceries', amount: 200, type: 'expense' },
-  { id: 4, date: '2023-07-04', description: 'Freelance Work', amount: 1000, type: 'income' },
-  { id: 5, date: '2023-07-05', description: 'Utilities', amount: 150, type: 'expense' },
-];
+interface TransactionListProps {
+  transactions: Transaction[];
+}
 
-const TransactionList: React.FC = () => {
+const TransactionList: React.FC<TransactionListProps> = ({ transactions }) => {
+  if (transactions.length === 0) {
+    return (
+      <div className="text-center py-4 text-comment">
+        No transactions available. Please upload a CSV file to see transactions.
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left">
@@ -29,11 +33,11 @@ const TransactionList: React.FC = () => {
         </thead>
         <tbody>
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className="border-b border-selection">
-              <td className="py-2 text-sm">{transaction.date}</td>
+            <tr key={transaction._id} className="border-b border-selection">
+              <td className="py-2 text-sm">{new Date(transaction.date).toLocaleDateString()}</td>
               <td className="py-2">{transaction.description}</td>
               <td className={`py-2 text-right ${transaction.type === 'income' ? 'text-green' : 'text-red'}`}>
-                {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
               </td>
             </tr>
           ))}

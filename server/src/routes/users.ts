@@ -23,7 +23,7 @@ router.post('/register', async (req, res) => {
 
 		// Generate JWT token
 		const token = jwt.sign(
-			{ userId: newUser._id },
+			{ userId: newUser._id.toString(), email: newUser.email },
 			process.env.JWT_SECRET as string,
 			{ expiresIn: '1h' }
 		);
@@ -41,22 +41,27 @@ router.post('/login', async (req, res) => {
 		const { email, password } = req.body;
 		const user = await User.findOne({ email });
 		if (!user) {
-			throw new Error('Unable to login');
+			return res.status(400).json({ message: 'Invalid credentials' });
 		}
 		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) {
-			throw new Error('Unable to login');
+			return res.status(400).json({ message: 'Invalid credentials' });
 		}
-		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
-		res.send({ user, token });
+		const token = jwt.sign(
+			{ userId: user._id.toString(), email: user.email },
+			process.env.JWT_SECRET as string,
+			{ expiresIn: '1h' }
+		);
+		res.json({ user: { id: user._id, email: user.email }, token });
 	} catch (error) {
-		res.status(400).send(error);
+		console.error('Login error:', error);
+		res.status(500).json({ message: 'Error logging in', error: error instanceof Error ? error.message : 'An unknown error occurred' });
 	}
 });
 
 // Get user profile
 router.get('/me', auth, async (req, res) => {
-	res.send(req.user);
+	res.json(req.user);
 });
 
 export default router;

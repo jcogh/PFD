@@ -40,7 +40,7 @@ Personal Finance Dashboard is a web application designed to help users track and
 
 1. Clone the repository:
 ```
-git clone https://github.com/yourusername/personal-finance-dashboard.git
+git clone https://github.com/jcogh/pfd.git
 cd personal-finance-dashboard
 ```
 
