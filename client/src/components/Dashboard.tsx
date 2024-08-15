@@ -52,11 +52,11 @@ const Dashboard: React.FC = () => {
       const response = await axios.post(`${API_URL}/api/import/csv`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}` // Assuming the user.id is used as the token
+          'Authorization': `Bearer ${token}`
         }
       });
       setUploadStatus(`Upload successful. ${response.data.count} transactions imported.`);
-      dispatch(fetchTransactions()); // Refresh transactions after successful upload
+      dispatch(fetchTransactions());
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setUploadStatus(`Upload failed: ${error.response?.data?.message || error.message}`);

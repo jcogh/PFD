@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { login } from '../store/authSlice';
+import { login as loginAction } from '../store/authSlice';
+import { login as loginAPI } from '../services/api';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,19 +11,17 @@ const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_URL}/users/login`, { email, password });
-      dispatch(login({
-        user: { id: response.data.user._id, email: response.data.user.email },
-        token: response.data.token
-      }));
+      const response = await loginAPI(email, password);
+      const { token, user } = response.data;
+      console.log('Login successful. Token:', token);
+      dispatch(loginAction({ user, token }));
       navigate('/dashboard');
-    } catch (err) {
-      setError('Invalid email or password');
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'An error occurred during login');
+      console.error('Login error:', error);
     }
   };
 

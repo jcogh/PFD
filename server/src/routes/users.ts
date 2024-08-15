@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import { auth } from '../middleware/auth';
+import crypto from 'crypto';
 
 const router = express.Router();
 
@@ -11,20 +12,26 @@ router.post('/register', async (req, res) => {
 	try {
 		const { name, email, password } = req.body;
 
-		// Check if user already exists
 		const existingUser = await User.findOne({ email });
 		if (existingUser) {
 			return res.status(400).json({ message: 'User already exists' });
 		}
 
-		// Create new user
-		const newUser = new User({ name, email, password });
+		const jwtSecret = crypto.randomBytes(64).toString('hex');
+		const encryptionKey = crypto.randomBytes(32).toString('hex');
+
+		const newUser = new User({
+			name,
+			email,
+			password,
+			jwtSecret,
+			encryptionKey
+		});
 		await newUser.save();
 
-		// Generate JWT token
 		const token = jwt.sign(
 			{ userId: newUser._id.toString(), email: newUser.email },
-			process.env.JWT_SECRET as string,
+			jwtSecret,
 			{ expiresIn: '1h' }
 		);
 
@@ -40,22 +47,21 @@ router.post('/login', async (req, res) => {
 	try {
 		const { email, password } = req.body;
 		const user = await User.findOne({ email });
-		if (!user) {
+		if (!user || !(await user.comparePassword(password))) {
 			return res.status(400).json({ message: 'Invalid credentials' });
 		}
-		const isMatch = await bcrypt.compare(password, user.password);
-		if (!isMatch) {
-			return res.status(400).json({ message: 'Invalid credentials' });
-		}
+
 		const token = jwt.sign(
-			{ userId: user._id.toString(), email: user.email },
-			process.env.JWT_SECRET as string,
+			{ userId: user._id.toString() },
+			user.jwtSecret, // Make sure you're using the user-specific JWT secret
 			{ expiresIn: '1h' }
 		);
+
+		console.log('Generated token:', token);
 		res.json({ user: { id: user._id, email: user.email }, token });
 	} catch (error) {
 		console.error('Login error:', error);
-		res.status(500).json({ message: 'Error logging in', error: error instanceof Error ? error.message : 'An unknown error occurred' });
+		res.status(500).json({ message: 'Error logging in' });
 	}
 });
 

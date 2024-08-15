@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { store } from '../store'; // Make sure this path is correct
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -6,12 +7,15 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+// In api.ts
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = store.getState().auth.token;
+    console.log('Current token in interceptor:', token);
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    console.log('Request headers:', config.headers);
     return config;
   },
   (error) => {
@@ -46,5 +50,12 @@ export const updateTransaction = (id: string, transactionData: any) =>
 
 export const deleteTransaction = (id: string) =>
   api.delete(`/transactions/${id}`);
+
+export const importCSV = (formData: FormData) =>
+  api.post('/import/csv', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 
 export default api;

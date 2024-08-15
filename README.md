@@ -6,12 +6,12 @@ Personal Finance Dashboard is a web application designed to help users track and
 
 ## Features
 
-- User authentication
+- User authentication and authorization
 - Dashboard with financial overview
 - Expense tracking by category
-- Transaction listing
-- Data visualization with charts
-- Dark mode user interface
+- Transaction listing and management
+- Data visualization with interactive charts
+- CSV import for bulk transaction upload
 - Encryption of sensitive data
 
 ## Technology Stack
@@ -29,6 +29,7 @@ Personal Finance Dashboard is a web application designed to help users track and
 - Encrypted storage of transaction descriptions in the database
 - Secure handling of encryption keys
 - HTTPS for all client-server communication
+- JWT for secure authentication
 
 ## Prerequisites
 

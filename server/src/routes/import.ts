@@ -4,7 +4,6 @@ import csv from 'csv-parser';
 import fs from 'fs';
 import { auth } from '../middleware/auth';
 import Transaction from '../models/Transaction';
-import logger from '../utils/logger';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -40,7 +39,7 @@ router.post('/csv', auth, upload.single('file'), async (req, res) => {
 
 		res.status(200).json({ message: 'CSV imported successfully', count: transactions.length });
 	} catch (error) {
-		logger.error('Error importing CSV:', error);
+		console.error('Error importing CSV:', error);
 		res.status(500).json({ message: 'Error importing CSV', error: error instanceof Error ? error.message : 'An unknown error occurred' });
 	}
 });

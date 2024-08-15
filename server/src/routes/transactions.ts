@@ -11,7 +11,7 @@ router.get('/', auth, async (req, res) => {
   logger.info('GET /api/transactions request received');
   try {
     const transactions = await Transaction.find({ user: req.user!.userId });
-    logger.info(`Found ${transactions.length} transactions`);
+    logger.info(`Found ${transactions.length} transactions for user ${req.user!.userId}`);
     res.json(transactions);
   } catch (error) {
     logger.error('Error fetching transactions:', error);
